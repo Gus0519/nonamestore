@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: web
-        image: localhost/nonamestore-frontend:v1.0 # La imagen local del frontend
-        imagePullPolicy: IfNotPresent # Evita que busque en Docker Hub remoto
+        image: gusgus890/nonamestore-frontend:latest # La imagen local del frontend
+        imagePullPolicy: Always # Evita que busque en Docker Hub remoto
         ports:
         - containerPort: 80 # El puerto estándar de la imagen Nginx:alpine
 

@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
       - name: api
-        image: localhost/nonamestore-backend:v1.0 # La imagen local que importamos
-        imagePullPolicy: IfNotPresent # ¡CRÍTICO! Le dice a K8s que use la imagen del disco y no vaya a internet
+        image: gusgus890/nonamestore-backend:latest # La imagen local que importamos
+        imagePullPolicy: Always # ¡CRÍTICO! Le dice a K8s que use la imagen del disco y no vaya a internet
         ports:
         - containerPort: 8080 # El puerto que expone Gin Gonic
 
