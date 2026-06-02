@@ -1,0 +1,31 @@
+# --- ETAPA 1: Builder (Compilación) ---
+FROM golang:1.26-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates
+
+WORKDIR /app
+
+# Copiar dependencias y descargarlas en caché
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copiar todo el código fuente del backend
+COPY . .
+
+# Compilar un binario estático y ligero apuntando a tu main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o nonamestore-backend ./cmd/api/main.go
+
+# --- ETAPA 2: Runtime (Imagen final limpia) ---
+FROM alpine:3.19
+
+RUN apk add --no-cache ca-certificates tzdata
+
+WORKDIR /app
+
+# Traer solo el binario compilado de la etapa anterior
+COPY --from=builder /app/nonamestore-backend .
+
+# Exponer el puerto de Gin
+EXPOSE 8080
+
+CMD ["./nonamestore-backend"]

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opensearch
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opensearch
+  template:
+    metadata:
+      labels:
+        app: opensearch
+    spec:
+      containers:
+      - name: opensearch
+        image: opensearchproject/opensearch:2.12.0
+        env:
+        - name: discovery.type
+          value: "single-node"
+        - name: plugins.security.disabled
+          value: "true" # Deshabilitamos seguridad avanzada temporalmente para agilizar el laboratorio local
+        - name: OPENSEARCH_JAVA_OPTS
+          value: "-Xms512m -Xmx512m" # Control estricto de memoria para que no sature tus workers
+        - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD # <- INYECTA ESTA LLAVE LITERAL
+          value: "ClaseDevops_2026"
+        ports:
+        - containerPort: 9200
+          name: rest
+        volumeMounts:
+        - name: opensearch-data
+          mountPath: /usr/share/opensearch/data
+      volumes:
+      - name: opensearch-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opensearch-service
+  namespace: monitoring
+spec:
+  selector:
+    app: opensearch
+  ports:
+    - port: 9200
+      targetPort: 9200
+      nodePort: 30561

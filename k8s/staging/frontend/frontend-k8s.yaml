@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nonamestore-frontend
+  labels:
+    app: nonamestore-frontend
+spec:
+  replicas: 2 # Mantenemos alta disponibilidad en ambos workers
+  selector:
+    matchLabels:
+      app: nonamestore-frontend
+  template:
+    metadata:
+      labels:
+        app: nonamestore-frontend
+    spec:
+      containers:
+      - name: web
+        image: localhost/nonamestore-frontend:v1.0 # La imagen local del frontend
+        imagePullPolicy: IfNotPresent # Evita que busque en Docker Hub remoto
+        ports:
+        - containerPort: 80 # El puerto estándar de la imagen Nginx:alpine
+
+        resources:
+          requests:
+            memory: "32Mi"   # Súper ligero: 32MB de RAM base
+            cpu: "20m"       # 20 mili-cores de CPU
+          limits:
+            memory: "64Mi"    # Máximo 64MB de RAM
+            cpu: "100m"      # Máximo 100 mili-cores de CPU
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  type: ClusterIP # Se queda interno por ahora; lo expondremos con Ingress en el paso 5
+  selector:
+    app: nonamestore-frontend
+  ports:
+  - port: 80
+    targetPort: 80

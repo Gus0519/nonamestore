@@ -1,0 +1,28 @@
+# --- ETAPA 1: Builder (Compilación de Svelte) ---
+FROM node:20-alpine AS build
+
+# Instalar pnpm globalmente dentro del contenedor de Node
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Copiar los archivos de dependencias para aprovechar la caché de Podman
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Copiar el resto del código fuente del frontend
+COPY . .
+
+# Compilar la aplicación (esto generará la carpeta /app/dist)
+RUN pnpm run build
+
+# --- ETAPA 2: Runtime (Servidor Web Nginx de producción) ---
+FROM nginx:alpine
+
+# Copiar única y exclusivamente los archivos estáticos compilados en la etapa 1
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Exponer el puerto estándar HTTP
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

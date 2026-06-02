@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: nonamestore-run-
+spec:
+  pipelineRef:
+    name: build-nonamestore-pipeline
+  workspaces:
+    - name: shared-workspace
+      persistentVolumeClaim:
+        claimName: tekton-workspace-pvc
+  params:
+    - name: repo-url
+      value: "https://github.com/Gus0519/nonamestore.git"

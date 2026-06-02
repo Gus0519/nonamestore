@@ -1,0 +1,16 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: backend-vpa
+  namespace: default
+spec:
+  # Apuntamos quirúrgicamente al deployment de Go creado en la Fase 2
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: nonamestore-backend
+  # Política de actualización
+  updatePolicy:
+    # "Off" significa que solo va a observar y darnos recomendaciones analíticas.
+    # No va a reiniciar ni tumbar los Pods en producción de forma automática por ahora.
+    updateMode: "Off"
