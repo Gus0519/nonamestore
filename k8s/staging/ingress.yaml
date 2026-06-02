@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nonamestore-ingress
+  namespaces: staging
   annotations:
     # Habilitamos CORS por seguridad para que Svelte pueda consumir la API limpiamente
     nginx.ingress.kubernetes.io/enable-cors: "true"
