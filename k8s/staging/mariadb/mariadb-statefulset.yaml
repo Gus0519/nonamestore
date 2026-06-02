@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
+  namespace: staging
 spec:
   serviceName: "mariadb"
   replicas: 1
