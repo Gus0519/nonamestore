@@ -42,3 +42,4 @@ import { writable } from 'svelte/store'
 export default writable(0)
 ```
 Prueba de Pipeline CI/CD
+segunda prueba
