@@ -108,7 +108,7 @@
           <path d="M12 22V8" />
           <path d="M8 14c2-2 4-2 4-2s2 0 4 2" />
         </svg>
-        <span class="brand-text">Verdant</span>
+        <span class="brand-text">NoNameStore</span>
       </a>
 
       <nav class="nav-links">
