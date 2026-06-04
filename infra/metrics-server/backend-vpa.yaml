@@ -13,4 +13,4 @@ spec:
   updatePolicy:
     # "Off" significa que solo va a observar y darnos recomendaciones analíticas.
     # No va a reiniciar ni tumbar los Pods en producción de forma automática por ahora.
-    updateMode: "Off"
+    updateMode: "Auto"
