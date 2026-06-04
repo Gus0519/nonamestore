@@ -76,7 +76,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend-svc # Este nombre será el DNS interno (http://backend-svc:8080)
-  namespace: staging # cambio aqui
+  namespace: prod # cambio aqui
 spec:
   type: ClusterIP # Solo visible internamente en el cluster por seguridad
   selector:
