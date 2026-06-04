@@ -8,6 +8,11 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+              - alertmanager-service:9093
     rule_files:
       - '/etc/prometheus/rules/*.yml'
 
@@ -22,6 +27,11 @@ data:
         kubernetes_sd_configs:
         - role: pod
           namespaces:
-          names:
-          - default
-          - monitoring
+            names:
+            - default
+            - monitoring
+            - staging
+      # NUEVA REGLA 3: Leer el estado del clúster (Fundamental para alertas de pods)
+      - job_name: 'kube-state-metrics'
+        static_configs:
+          - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
