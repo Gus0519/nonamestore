@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nonamestore-config
+  namespace: prod
+data:
+  DB_HOST: "mariadb-service"       # Reemplaza por el nombre del Service interno de MariaDB de tu Fase 1
+  DB_PORT: "3306"
+  DB_NAME: "prueba_persistencia"

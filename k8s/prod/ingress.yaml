@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nonamestore-ingress
+  namespace: prod
+  annotations:
+    # Habilitamos CORS por seguridad para que Svelte pueda consumir la API limpiamente
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: www.nonamestore.local
+    http:
+      paths:
+      - path: /products
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-svc # Tu servicio de Go en el puerto 8080
+            port:
+              number: 8080
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-svc
+            port:
+              number: 8080
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-svc # Tu servicio de Svelte en el puerto 80
+            port:
+              number: 80

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nonamestore-backend
+  namespace: prod #cambio aqui
+  labels:
+    app: nonamestore-backend
+spec:
+  replicas: 2 # Alta disponibilidad: levantamos dos pods en paralelo
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: nonamestore-backend
+  template:
+    metadata:
+      labels:
+        app: nonamestore-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: api
+        image: gusgus890/nonamestore-backend:latest 
+        imagePullPolicy: Always 
+        ports:
+        - containerPort: 8080 # El puerto que expone Gin Gonic
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: nonamestore-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: nonamestore-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: nonamestore-config
+              key: DB_NAME
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret     # El nombre exacto de tu Secret de la Fase 1
+              key: password    # La clave interna del password en ese Secret
+
+        resources:
+          requests:
+            memory: "64Mi"   # Reserva 64 Megabytes de RAM iniciales
+            cpu: "50m"       # Reserva 50 mili-cores de CPU (0.05 de un core)
+          limits:
+            memory: "128Mi"  # Techo máximo de 128 Megabytes de RAM
+            cpu: "200m"      # Techo máximo de 200 mili-cores de CPU
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc # Este nombre será el DNS interno (http://backend-svc:8080)
+  namespace: staging # cambio aqui
+spec:
+  type: ClusterIP # Solo visible internamente en el cluster por seguridad
+  selector:
+    app: nonamestore-backend # Apunta exactamente a los pods del Deployment de arriba
+  ports:
+  - port: 8080 # Puerto del servicio
+    targetPort: 8080 # Puerto del contenedor
