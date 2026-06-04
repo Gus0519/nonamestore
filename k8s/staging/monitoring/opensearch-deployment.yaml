@@ -41,9 +41,9 @@ metadata:
   name: opensearch-service
   namespace: monitoring
 spec:
+  type: ClusterIP
   selector:
     app: opensearch
   ports:
     - port: 9200
       targetPort: 9200
-      nodePort: 30561
