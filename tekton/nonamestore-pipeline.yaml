@@ -10,6 +10,8 @@ spec:
     - name: repo-url
       type: string
       default: "https://github.com/Gus0519/nonamestore.git"
+    - name: image-tag
+      type: string
   tasks:
     # Paso 1: Clonar
     - name: fetch-repository
@@ -36,7 +38,7 @@ spec:
           workspace: docker-credentials
       params:
         - name: IMAGE
-          value: docker.io/gusgus890/nonamestore-frontend:latest
+          value: docker.io/gusgus890/nonamestore-frontend:$(params.image-tag)
         - name: CONTEXT
           value: /src/frontend
         - name: DOCKERFILE
@@ -54,7 +56,7 @@ spec:
           workspace: docker-credentials
       params:
         - name: IMAGE
-          value: docker.io/gusgus890/nonamestore-backend:latest
+          value: docker.io/gusgus890/nonamestore-backend:$(params.image-tag)
         - name: CONTEXT
           value: /src/backend
         - name: DOCKERFILE
@@ -73,4 +75,51 @@ spec:
                 echo "Iniciando despliegue en staging..."
                 kubectl rollout restart deployment nonamestore-frontend -n staging
                 kubectl rollout restart deployment nonamestore-backend -n staging
-                echo "¡Despliegue automatizado completado al 100%!"
+                echo "¡Despliegue automatizado completado al 100%"
+
+# Paso Final: Actualizar manifiestos y empujar a GitHub
+    - name: update-gitops-manifests
+      runAfter: 
+        - build-backend    # Asegúrate de que estos nombres coincidan con tus tareas de Kaniko
+        - build-frontend
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      taskSpec:
+        workspaces:
+          - name: source
+        steps:
+          - name: update-and-push
+            image: alpine/git:v2.40.1 # Imagen ligera que ya incluye Git
+            workingDir: $(workspaces.source.path)
+            env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: github-auth-secret # El secreto que creaste en el paso anterior
+                    key: token
+            script: |
+              #!/bin/sh
+              set -e
+
+              echo "1. Configurando identidad del Bot de Tekton..."
+              git config --global user.email "tekton-bot@nonamestore.local"
+              git config --global user.name "Tekton CI/CD Bot"
+
+              git config --global --add safe.directory /workspace/source
+             
+              echo "2. Reemplazando etiquetas en los manifiestos de Staging..."
+              # sed busca la linea de la imagen y reemplaza lo que hay despues de los dos puntos con el nuevo tag
+              sed -i "s|image: gusgus890/nonamestore-backend:.*|image: gusgus890/nonamestore-backend:$(params.image-tag)|g" k8s/staging/backend/backend-k8s.yaml
+              sed -i "s|image: gusgus890/nonamestore-frontend:.*|image: gusgus890/nonamestore-frontend:$(params.image-tag)|g" k8s/staging/frontend/frontend-k8s.yaml
+
+              echo "3. Preparando el commit..."
+              git add k8s/staging/backend/backend-k8s.yaml
+              git add k8s/staging/frontend/frontend-k8s.yaml
+              
+              # Si no hay cambios (por ejemplo si relanzaste el pipeline), salimos sin error
+              git diff-index --quiet HEAD || git commit -m "chore(gitops): despliegue automatico version $(params.image-tag) en staging"
+
+              echo "4. Empujando cambios a GitHub..."
+              # Usamos la URL con el token inyectado para tener permisos de escritura
+              git push https://Gus0519:${GITHUB_TOKEN}@github.com/Gus0519/nonamestore.git HEAD:main

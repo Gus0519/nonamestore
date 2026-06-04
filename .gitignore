@@ -4,3 +4,4 @@ k8s/staging/CI-CD/dockerhub-secret.yaml
 tekton/dockerhub-secret.yaml
 k8s/staging/mariadb/mariadb-secret.yaml
 k8s/prod/mariadb/mariadb-secret.yaml
+tekton/github-secret.yaml
