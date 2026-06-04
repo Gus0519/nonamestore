@@ -1,0 +1,57 @@
+# 1. El Traductor (Extrae la URL del repositorio desde el Webhook de GitHub)
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-binding
+spec:
+  params:
+    - name: gitrepositoryurl
+      value: $(body.repository.clone_url)
+
+---
+# 2. La Plantilla (Reemplaza a tu run-manual.yaml)
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: nonamestore-template
+spec:
+  params:
+    - name: gitrepositoryurl
+      description: URL del repositorio inyectada por el Binding
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: github-run-
+      spec:
+        pipelineRef:
+          name: build-and-push-nonamestore
+        serviceAccountName: tekton-build-bot
+        params:
+          - name: repo-url
+            value: $(tt.params.gitrepositoryurl) # Usamos la variable dinámica
+        workspaces:
+          - name: shared-workspace
+            persistentVolumeClaim:
+              claimName: tekton-workspace-pvc
+          - name: docker-credentials
+            secret:
+              secretName: docker-credentials
+              items:
+                - key: .dockerconfigjson
+                  path: config.json
+
+---
+# 3. El Escuchador (El servidor que recibe la petición de GitHub)
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: github-listener
+spec:
+  serviceAccountName: tekton-build-bot
+  triggers:
+    - name: github-push-trigger
+      bindings:
+        - ref: github-binding
+      template:
+        ref: nonamestore-template

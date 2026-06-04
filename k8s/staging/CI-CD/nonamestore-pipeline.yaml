@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-push-nonamestore
+spec:
+  workspaces:
+    - name: shared-workspace
+    - name: docker-credentials  # <-- NUEVO: Canal directo para la llave
+  params:
+    - name: repo-url
+      type: string
+      default: "https://github.com/Gus0519/nonamestore.git"
+  tasks:
+    # Paso 1: Clonar
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: "main"
+
+    # Paso 2: Construir Frontend
+    - name: build-frontend
+      runAfter: ["fetch-repository"]
+      taskRef:
+        name: kaniko
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+        - name: dockerconfig      # <-- NUEVO: Le damos la llave a Kaniko
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: docker.io/gusgus890/nonamestore-frontend:latest
+        - name: CONTEXT
+          value: /src/frontend
+        - name: DOCKERFILE
+          value: ./Containerfile
+
+    # Paso 3: Construir Backend
+    - name: build-backend
+      runAfter: ["fetch-repository"]
+      taskRef:
+        name: kaniko
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+        - name: dockerconfig      # <-- NUEVO: Le damos la llave a Kaniko
+          workspace: docker-credentials
+      params:
+        - name: IMAGE
+          value: docker.io/gusgus890/nonamestore-backend:latest
+        - name: CONTEXT
+          value: /src/backend
+        - name: DOCKERFILE
+          value: ./Containerfile
+      # Paso 4: Despliegue Automático (Obliga a ArgoCD/K8s a jalar la nueva imagen)
+    - name: auto-deploy
+      runAfter: ["build-frontend", "build-backend"] # Solo se ejecuta si la compilación fue exitosa
+      taskSpec:
+        steps:
+          - name: restart-pods
+            image: bitnami/kubectl:latest # Usamos un contenedor ligero que ya trae kubectl instalado
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Iniciando despliegue en staging..."
+                kubectl rollout restart deployment nonamestore-frontend -n staging
+                kubectl rollout restart deployment nonamestore-backend -n staging
+                echo "¡Despliegue automatizado completado al 100%!"

@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-bot-cluster-role
+rules:
+  # 1. Permiso para leer la configuración del gatillo
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggerbindings", "clustertriggerbindings", "triggertemplates", "triggers", "interceptors", "clusterinterceptors"]
+    verbs: ["get", "list", "watch"]
+  # 2. Permiso para presionar el botón de inicio (crear el PipelineRun)
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "pipelineruns/status", "taskruns", "taskruns/status"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-bot-cluster-binding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-build-bot
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-bot-cluster-role

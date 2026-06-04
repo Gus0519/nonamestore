@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: manual-run-
+spec:
+  pipelineRef:
+    name: build-and-push-nonamestore
+  serviceAccountName: tekton-build-bot
+  params:
+    - name: repo-url
+      value: "https://github.com/Gus0519/nonamestore.git" # <-- Asegúrate de poner tu URL aquí
+  workspaces:
+    - name: shared-workspace
+      persistentVolumeClaim:
+        claimName: tekton-workspace-pvc
+    - name: docker-credentials
+      secret:
+        secretName: docker-credentials
+        items:
+          - key: .dockerconfigjson   # <-- Kubernetes lo guarda así
+            path: config.json        # <-- Kaniko lo necesita así
