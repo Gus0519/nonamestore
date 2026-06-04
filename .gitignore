@@ -1,0 +1,3 @@
+ngrok.log
+nohup.out
+k8s/staging/CI-CD/dockerhub-secret.yaml

@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: run-nonamestore-staging
+  namespace: tekton-pipelines
+spec:
+  pipelineRef:
+    name: nonamestore-pipeline-staging
+  params:
+    - name: repo-url
+      value: https://github.com/Gus0519/nonamestore.git
+    - name: dockerhub-username
+      value: gusgus890
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate: # Tekton creará un volumen persistente dinámico para la compilación
+        spec:
+          storageClassName: nfs-client
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi # Espacio suficiente para Node modules y dependencias de Go

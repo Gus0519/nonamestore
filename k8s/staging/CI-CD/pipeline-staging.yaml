@@ -1,0 +1,60 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: nonamestore-pipeline-staging
+  namespace: tekton-pipelines
+spec:
+  description: |
+    Pipeline de Integración Continua para NoNameStore en Staging.
+    Clona de GitHub, compila y sube el backend y frontend simultáneamente.
+  params:
+    - name: repo-url
+      type: string
+      description: URL de tu repositorio de GitHub
+    - name: dockerhub-username
+      type: string
+      description: Tu usuario de Docker Hub
+  workspaces:
+    - name: shared-workspace # El almacenamiento donde convivirán el código y Kaniko
+  tasks:
+    - name: clone-repo
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: main # Cambia a la rama que estés usando
+
+    - name: build-backend
+      runAfter: [clone-repo] # Espera a que termine la clonación
+      taskRef:
+        name: kaniko
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: docker.io/$(params.dockerhub-username)/nonamestore-backend:staging-latest
+        - name: DOCKERFILE
+          value: src/backend/Containerfile
+        - name: CONTEXT
+          value: ./
+
+    - name: build-frontend
+      runAfter: [clone-repo] # Se ejecuta en paralelo al backend para ahorrar tiempo
+      taskRef:
+        name: kaniko
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: docker.io/$(params.dockerhub-username)/nonamestore-frontend:staging-latest
+        - name: DOCKERFILE
+          value: src/frontend/Containerfile
+        - name: CONTEXT
+          value: ./

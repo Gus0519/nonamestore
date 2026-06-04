@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: build-frontend-staging
+  namespace: tekton-pipelines
+spec:
+  taskRef:
+    name: kaniko
+  params:
+    - name: IMAGE
+      value: docker.io/gusgus890/nonamestore-frontend:staging-latest
+    - name: DOCKERFILE
+      value: src/frontend/Containerfile
+    - name: CONTEXT
+      value: ./
+  workspaces:
+    - name: source
+      emptyDir: {}
