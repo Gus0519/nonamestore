@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: gusgus890/nonamestore-frontend:0b027511c723951884913e0218b1ce26d467b5d6
+        image: gusgus890/nonamestore-frontend:3be1f350e5a9abfd444978e86c85e7d58cc9752e
         imagePullPolicy: Always # Evita que busque en Docker Hub remoto
         ports:
         - containerPort: 80 # El puerto estándar de la imagen Nginx:alpine
