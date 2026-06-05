@@ -122,4 +122,5 @@ spec:
 
               echo "4. Empujando cambios a GitHub..."
               # Usamos la URL con el token inyectado para tener permisos de escritura
+              git pull --rebase https://Gus0519:${GITHUB_TOKEN}@github.com/Gus0519/nonamestore.git main
               git push https://Gus0519:${GITHUB_TOKEN}@github.com/Gus0519/nonamestore.git HEAD:main
