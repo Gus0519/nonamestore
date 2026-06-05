@@ -213,3 +213,6 @@ El backend recibe la configuración de la base de datos a través de un ConfigMa
 | `PodCrashLooping` | Cualquier pod en estado `CrashLoopBackOff` |
 
 Las notificaciones van al canal `#alertas-nonamestore` en Slack.
+
+
+# Prueba pipeline
