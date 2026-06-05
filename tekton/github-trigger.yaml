@@ -55,6 +55,15 @@ spec:
   serviceAccountName: tekton-build-bot
   triggers:
     - name: github-push-trigger
+      interceptors:
+        - ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              # Ignora el push si el committer es el bot de Tekton
+              value: >
+                body.head_commit.committer.name != "Tekton CI/CD Bot" &&
+                body.head_commit.author.name != "Tekton CI/CD Bot"
       bindings:
         - ref: github-binding
       template:
