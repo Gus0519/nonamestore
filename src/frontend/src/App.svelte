@@ -151,7 +151,7 @@
       <h1 class="hero-title">Transforma tu espacio con plantas de interior</h1>
       <p class="hero-description">
         Descubre nuestra coleccion curada de plantas que purifican el aire
-        y llenan de vida cada rincon de tu hogar.
+        y llenan de vida cada rincon de tu hogar. Evidencia de cambio
       </p>
       <a href="#catalogo" class="btn-primary">Explorar Catalogo</a>
     </div>
