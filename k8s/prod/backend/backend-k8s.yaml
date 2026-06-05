@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: gusgus890/nonamestore-backend:latest 
+        image: gusgus890/nonamestore-backend:584890a812e14eed3b51807122435e5118959305 
         imagePullPolicy: Always 
         ports:
         - containerPort: 8080 # El puerto que expone Gin Gonic
