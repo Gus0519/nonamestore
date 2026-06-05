@@ -1,5 +1,5 @@
 # --- ETAPA 1: Builder (Compilación de Svelte) ---
-FROM node:20-alpine AS build
+FROM mirror.gcr.io/library/node:18-alpine AS build
 
 # Instalar pnpm globalmente dentro del contenedor de Node
 RUN npm install -g pnpm
