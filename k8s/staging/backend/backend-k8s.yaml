@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: gusgus890/nonamestore-backend:928227dc6ca49fdd71c81f819b366da3ca557ad6
+        image: gusgus890/nonamestore-backend:e797280c9894501c3e6a5778123875279b03e26b
         imagePullPolicy: Always # ¡CRÍTICO! Le dice a K8s que use la imagen del disco y no vaya a internet
         ports:
         - containerPort: 8080 # El puerto que expone Gin Gonic
